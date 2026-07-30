@@ -19,7 +19,6 @@ function TeamMember({ member }) {
           {member.department}
         </span>
       </div>
-
       <h3 className="text-heading-md font-extrabold text-gray-900 mb-2">
         {member.name}
       </h3>

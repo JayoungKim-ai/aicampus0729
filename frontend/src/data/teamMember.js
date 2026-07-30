@@ -47,4 +47,16 @@ export const members = [
     github: "https://github.com",
     email: "haeun@example.com",
   },
+  {
+    id: 5,
+    name: "최하은",
+    role: "팀원",
+    department: "디자인",
+    avatar:
+      "https://api.dicebear.com/9.x/adventurer/svg?seed=Haeun&backgroundColor=fce7f3",
+    description: "직관적이고 아름다운 UI를 만듭니다.",
+    skills: ["Figma", "UI/UX", "Prototyping"],
+    github: "https://github.com",
+    email: "haeun@example.com",
+  },
 ];
