@@ -1,5 +1,3 @@
-import React from "react";
-
 function TeamMember({ member }) {
   return (
     <div className="group bg-white rounded-4xl p-6 pt-9 border border-primary-100 shadow-soft hover:shadow-card hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center text-center relative overflow-hidden animate-fade-in">
