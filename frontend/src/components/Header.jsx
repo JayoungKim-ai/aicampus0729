@@ -1,4 +1,5 @@
 import React from "react";
+import HealthChk from "./HealthChk";
 
 function Header() {
   return (
@@ -13,7 +14,6 @@ function Header() {
             TeamFlow
           </span>
         </a>
-
         {/* 네비게이션 */}
         <nav className="hidden md:flex items-center gap-1">
           <a
@@ -40,7 +40,8 @@ function Header() {
           >
             연락처
           </a>
-        </nav>
+        </nav>{" "}
+        <HealthChk />
       </div>
     </header>
   );

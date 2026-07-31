@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 
 function HealthChk() {
   const [message, setMessage] = useState("접속중...");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     // 데이터 요청
@@ -13,19 +12,13 @@ function HealthChk() {
         const data = await response.json();
         setMessage(data.status);
       } catch (error) {
-        setMessage("서버연결실패" + error.message);
-        setError(error.message);
+        setMessage("서버연결실패 - " + error.message);
       }
     }
     getData();
   }, []);
 
-  return (
-    <div>
-      {message}
-      {error}
-    </div>
-  );
+  return <div>{message}</div>;
 }
 
 export default HealthChk;

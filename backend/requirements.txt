@@ -1,1 +1,4 @@
 fastapi[standard]
+httpx         # 외부 API에 HTTP 요청을 보내기 위한 패키지
+python-dotenv # .env 파일에서 환경변수(API 키 등)를 불러오기 위한 패키지
+sqlalchemy      # DB 연결·모델 정의·저장/조회 (ORM)
