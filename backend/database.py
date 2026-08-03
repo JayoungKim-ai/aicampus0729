@@ -9,10 +9,11 @@ class Festival(Base):
     __tablename__ = "festivals"
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # 자체 고유번호
-    name         = Column(String)   # fstvlNm         축제명
+    name         = Column(String, index=True)   # fstvlNm         축제명
+    region       = Column(String, index=True)   # (주소에서 추출)   광역시·도
     place        = Column(String)   # opar            개최장소
-    start_date   = Column(String)   # fstvlStartDate  축제시작일자
-    end_date     = Column(String)   # fstvlEndDate    축제종료일자
+    start_date   = Column(String, index=True)   # fstvlStartDate  축제시작일자
+    end_date     = Column(String, index=True)   # fstvlEndDate    축제종료일자
     content      = Column(Text)     # fstvlCo         축제내용 (길어서 Text)
     manage_org   = Column(String)   # mnnstNm         주관기관명
     host_org     = Column(String)   # auspcInsttNm    주최기관명

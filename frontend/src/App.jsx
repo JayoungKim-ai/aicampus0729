@@ -5,6 +5,7 @@ import TestPage from "./pages/TestPage";
 import CounterPage from "./pages/CounterPage";
 import TodoList from "./pages/TodoList";
 import HealthChk from "./components/HealthChk";
+import FestivalPage from "./pages/FestivalPage";
 
 import "./App.css";
 
@@ -12,7 +13,7 @@ function App() {
   return (
     <>
       <Header />
-      <HealthChk />
+      <FestivalPage />
       <Footer />
     </>
   );
