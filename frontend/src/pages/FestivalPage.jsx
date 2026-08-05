@@ -8,12 +8,48 @@ import FestivalItem from "../components/FestivalItem";
 const tabs = ["전체", "진행중", "예정", "종료"];
 const ACTIVE_TAB = "전체"; // 고정 화면이므로 선택된 탭을 상수로 지정
 const API_BASE = "http://127.0.0.1:8000";
+const SIZE = 20;
 
 export default function FestivalPage() {
   const [festivals, setFestivals] = useState([]); // 축제목록
-  const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState(0); // 전체 데이터 수
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+
+  const [status, setStatus] = useState(""); // server로...전체(""), 진행중, 예정, 종료
+  const [regions, setResions] = useState([]); // 지역목록
+  const [region, setRegion] = useState(""); // server로...선택된 지역명
+  const [date, setDate] = useState(""); // server로...선택된 날짜
+  const [inputKeyword, setInputKeyword] = useState(""); //입력중인 축제명(제어컴포넌트에서 사용)
+  const [keyword, setKeyword] = useState(""); // server로...검색할 축제명
+
+  const totalPage = Math.ceil(total / SIZE); // 전체 페이지 수
+
+  function changeStatus(tab) {
+    setStatus(tab === "전체" ? "" : tab);
+    setPage(1);
+  }
+  function changeRegion(region) {
+    setRegion(region);
+    setPage(1);
+  }
+  function changeDate(date) {
+    setDate(date);
+    setPage(1);
+  }
+  function changeInputKeyword(inputKeyword) {
+    setInputKeyword(inputKeyword);
+    setPage(1);
+  }
+  useEffect(() => {
+    async function loadRegions() {
+      const response = await fetch(`${API_BASE}/festivals/regions`);
+      const data = await response.json();
+      setResions(data);
+    }
+    loadRegions();
+  }, []);
 
   useEffect(() => {
     // API로 데이터 요청
@@ -21,7 +57,9 @@ export default function FestivalPage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_BASE}/festivals`);
+        const response = await fetch(
+          `${API_BASE}/festivals?page=${page}&size=${SIZE}&status=${status}&region=${region}&date_=${date}&keyword=${keyword}`,
+        );
         if (!response.ok) {
           throw new Error(`오류발생:${response.status}`);
         }
@@ -36,7 +74,7 @@ export default function FestivalPage() {
       }
     }
     loadFestivals();
-  }, []);
+  }, [page, status, region, date, keyword]);
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -53,9 +91,10 @@ export default function FestivalPage() {
         <div className="grid grid-cols-4 gap-1 bg-white border border-primary-100 rounded-2xl p-1.5 shadow-soft mb-5 md:mb-6">
           {tabs.map((tab) => (
             <button
+              onClick={() => changeStatus(tab)}
               key={tab}
               className={
-                tab === ACTIVE_TAB
+                tab === (status || "전체")
                   ? "py-2 md:py-2.5 rounded-xl bg-primary-500 text-white text-caption md:text-body font-bold"
                   : "py-2 md:py-2.5 rounded-xl text-caption md:text-body font-medium text-gray-500 hover:text-primary-700 hover:bg-primary-50 transition-colors"
               }
@@ -76,10 +115,20 @@ export default function FestivalPage() {
                 <label className="text-caption font-semibold text-gray-600">
                   지역
                 </label>
-                <select className="h-11 w-full px-3 rounded-lg border border-primary-100 bg-white text-caption md:text-body text-gray-700 outline-none">
-                  <option>전체 지역</option>
-                  <option>경기도</option>
-                  <option>부산광역시</option>
+                {/* 제어컴포넌트 */}
+                <select
+                  value={region}
+                  onChange={(e) => changeRegion(e.target.value)}
+                  className="h-11 w-full px-3 rounded-lg border border-primary-100 bg-white text-caption md:text-body text-gray-700 outline-none"
+                >
+                  <option value="">전체 지역</option>
+                  {regions.map((r) => (
+                    <option key={r.name} value={r.name}>
+                      {r.name}({r.count})
+                    </option>
+                  ))}
+                  {/* <option>경기도</option>
+                  <option>부산광역시</option> */}
                 </select>
               </div>
 
@@ -92,6 +141,8 @@ export default function FestivalPage() {
                   날짜
                 </label>
                 <input
+                  value={date}
+                  onChange={(e) => changeDate(e.target.value)}
                   type="date"
                   id="startDate"
                   name="startDate"
@@ -108,11 +159,19 @@ export default function FestivalPage() {
               <div className="flex gap-2">
                 {/* min-w-0: 입력창이 버튼을 밀어내지 않고 줄어들 수 있게 함 */}
                 <input
+                  value={inputKeyword}
+                  onChange={(e) => changeInputKeyword(e.target.value)}
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") setKeyword(inputKeyword);
+                  }}
                   type="text"
                   placeholder="예: 불꽃축제, 벚꽃축제"
                   className="h-11 flex-1 min-w-0 px-4 rounded-lg border border-primary-100 bg-white text-caption md:text-body text-gray-700 outline-none placeholder:text-gray-300"
                 />
-                <button className="h-11 shrink-0 px-5 md:px-6 rounded-lg bg-primary-500 text-white text-caption md:text-body font-bold shadow-sm hover:bg-primary-700 transition-colors">
+                <button
+                  onClick={() => setKeyword(inputKeyword)}
+                  className="h-11 shrink-0 px-5 md:px-6 rounded-lg bg-primary-500 text-white text-caption md:text-body font-bold shadow-sm hover:bg-primary-700 transition-colors"
+                >
                   검색
                 </button>
               </div>
@@ -138,15 +197,22 @@ export default function FestivalPage() {
         {/* ===================== 페이지네이션 ===================== */}
         <div className="flex items-center justify-center gap-5 mt-8 md:mt-10">
           <button
-            className="px-5 py-2 rounded-lg bg-gray-100 text-gray-300 text-caption md:text-body font-semibold"
-            disabled
+            className={`px-5 py-2 rounded-lg bg-white border border-primary-100 text-primary-500 text-caption md:text-body font-bold hover:bg-primary-50 transition-colors ${page <= 1 && "invisible"}`}
+            onClick={() => {
+              setPage(page - 1);
+            }}
           >
             이전
           </button>
           <span className="text-caption md:text-body font-semibold text-gray-700">
-            1 / 2
+            {page} / {totalPage}
           </span>
-          <button className="px-5 py-2 rounded-lg bg-white border border-primary-100 text-primary-500 text-caption md:text-body font-bold hover:bg-primary-50 transition-colors">
+          <button
+            className={`px-5 py-2 rounded-lg bg-white border border-primary-100 text-primary-500 text-caption md:text-body font-bold hover:bg-primary-50 transition-colors ${page >= totalPage && "invisible"}`}
+            onClick={() => {
+              setPage(page + 1);
+            }}
+          >
             다음
           </button>
         </div>
