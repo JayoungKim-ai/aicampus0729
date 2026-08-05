@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from datetime import datetime
 
 class FestivalSummary(BaseModel):
     """목록에 쓰는 요약 정보. 카드에 보이는 것만 담는다."""
@@ -32,3 +33,29 @@ class RegionOut(BaseModel):
     """지역 선택 상자에 넣을 항목."""
     name: str
     count: int
+
+
+
+class ReviewCreate(BaseModel):
+    """후기 작성 요청 body."""
+    nickname: str = Field(min_length=1, max_length=20, description="닉네임")
+    # ge=1, le=5 → 1 이상 5 이하만 허용
+    rating: int = Field(ge=1, le=5, description="별점 1~5")
+    content: str = Field(min_length=1, max_length=1000, description="후기 내용")
+    
+class ReviewOut(BaseModel):
+    """후기 응답."""
+    id: int
+    festival_id: int
+    nickname: str
+    rating: int
+    content: str
+    created_at: datetime
+    # SQLAlchemy 모델 → Pydantic 변환 허용
+    class Config:
+        from_attributes = True
+
+class ReviewListOut(BaseModel):
+    """특정 축제 후기 목록."""
+    total: int
+    items: list[ReviewOut]

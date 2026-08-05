@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // ===================== 상태별 배지 색 =====================
 // 상태 문자열 → Tailwind 클래스를 짝지어 두는 표.
@@ -31,9 +32,11 @@ function FestivalItem({ festival }) {
 
         {/* 버튼 묶음: 카드 높이를 늘리지 않도록 헤더 오른쪽에 함께 배치 */}
         <div className="shrink-0 flex items-center gap-2">
-          <button className="text-caption font-bold text-primary-500 bg-primary-50 px-3 py-2 rounded-lg hover:bg-primary-100 transition-colors">
-            상세 보기
-          </button>
+          <Link to={`/festivals/${festival.id}`}>
+            <button className="text-caption font-bold text-primary-500 bg-primary-50 px-3 py-2 rounded-lg hover:bg-primary-100 transition-colors">
+              상세 보기
+            </button>
+          </Link>
           <button className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-primary-500 hover:border-primary-100 hover:bg-primary-50 transition-colors">
             <Star size={18} />
           </button>

@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, Float
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, ForeignKey, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
+from datetime import datetime
 
 engine = create_engine("sqlite:///./festivals.db")
 SessionLocal = sessionmaker(bind=engine)
@@ -28,5 +29,18 @@ class Festival(Base):
     reference_date = Column(String) # referenceDate   데이터기준일자
     provider_code  = Column(String) # instt_code      제공기관코드
     provider_name  = Column(String) # instt_nm        제공기관명
+
+
+class Review(Base):
+    """축제 후기. 로그인이 없으므로 nickname으로 작성자를 구분한다."""
+    __tablename__ = "reviews"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # festivals.id 를 가리킨다. 어떤 축제에 대한 후기인지
+    festival_id = Column(Integer, ForeignKey("festivals.id"), index=True, nullable=False)
+    nickname = Column(String, nullable=False)   # 작성자 닉네임
+    rating = Column(Integer, nullable=False)    # 별점 1~5
+    content = Column(Text, nullable=False)      # 후기 본문    
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)# 작성일시
 
 Base.metadata.create_all(engine)

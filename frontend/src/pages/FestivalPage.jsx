@@ -42,6 +42,17 @@ export default function FestivalPage() {
     setInputKeyword(inputKeyword);
     setPage(1);
   }
+
+  function downloadCsv() {
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (region) params.set("region", region);
+    if (date) params.set("date_", date);
+    if (keyword) params.set("keyword", keyword);
+    // 새 탭/이동으로 파일 다운로드 유도
+    window.location.href = `${API_BASE}/festivals/download?${params}`;
+  }
+
   useEffect(() => {
     async function loadRegions() {
       const response = await fetch(`${API_BASE}/festivals/regions`);
@@ -174,6 +185,7 @@ export default function FestivalPage() {
                 >
                   검색
                 </button>
+                <button onClick={downloadCsv}>CSV 다운로드</button>
               </div>
             </div>
           </div>

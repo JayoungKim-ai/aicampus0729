@@ -2,9 +2,13 @@ import os
 import math
 import httpx
 from dotenv import load_dotenv
-from database import SessionLocal, Festival
+from database import SessionLocal, Festival, Review
 from fastapi import HTTPException     
-
+from schemas import ReviewCreate, ReviewListOut, ReviewOut
+from datetime import datetime
+import csv
+import io
+from fastapi.responses import StreamingResponse
 from fastapi import APIRouter
 router = APIRouter(prefix="/festivals", tags=["축제"])
 
@@ -234,3 +238,111 @@ def sync_festivals():
 
     return {"total_count": total_count, "saved": saved, "skipped": total_count - saved}
 
+
+
+
+# -------------------------------------------------------------
+# 축제 후기
+# -------------------------------------------------------------
+
+def get_festival_or_404(db, festival_id: int):
+    """축제가 없으면 404, 있으면 Festival 행 반환."""
+    festival = db.query(Festival).filter(Festival.id == festival_id).first()
+    if festival is None:
+        raise HTTPException(status_code=404, detail="축제를 찾을 수 없습니다")
+    return festival
+
+
+@router.get("/{festival_id}/reviews", response_model=ReviewListOut)
+def list_reviews(festival_id: int):
+    """해당 축제 후기 목록 (최신순)."""
+    db = SessionLocal()
+    try:
+        get_festival_or_404(db, festival_id)
+
+        rows = (
+            db.query(Review)
+            .filter(Review.festival_id == festival_id)
+            .order_by(Review.created_at.desc())
+            .all()
+        )
+        return {"total": len(rows), "items": rows}
+    finally:
+        db.close()
+
+
+@router.post("/{festival_id}/reviews", response_model=ReviewOut, status_code=201)
+def create_review(festival_id: int, body: ReviewCreate):
+    """후기 작성. body = nickname, rating, content."""
+    db = SessionLocal()
+    try:
+        get_festival_or_404(db, festival_id)
+
+        review = Review(
+            festival_id=festival_id,
+            nickname=body.nickname.strip(),
+            rating=body.rating,
+            content=body.content.strip(),
+            created_at=datetime.utcnow(),
+        )
+        db.add(review)
+        db.commit()
+        db.refresh(review)  # id, created_at 등 DB 값 다시 읽기
+        return review
+    finally:
+        db.close()
+
+
+
+@router.get("/download")
+def download_festivals(
+    region: str | None = None,
+    date_: str | None = None,
+    keyword: str | None = None,
+    status: str | None = None,
+):
+    today = date.today().isoformat()
+    db = SessionLocal()
+    try:
+        # list_festivals 와 동일한 필터 로직
+        query = db.query(Festival)
+        if region:
+            query = query.filter(Festival.region == region)
+        if keyword:
+            query = query.filter(Festival.name.like(f"%{keyword}%"))
+        if date_:
+            query = query.filter(
+                Festival.start_date <= date_,
+                Festival.end_date >= date_,
+            )
+        if status == "예정":
+            query = query.filter(Festival.start_date > today)
+        elif status == "진행중":
+            query = query.filter(
+                Festival.start_date <= today,
+                Festival.end_date >= today,
+            )
+        elif status == "종료":
+            query = query.filter(Festival.end_date < today)
+        rows = query.order_by(Festival.id.asc()).all()
+        items = [to_summary(r, today) for r in rows]
+        # CSV를 메모리에 작성
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(["id", "축제명", "지역", "장소", "주소", "시작일", "종료일", "상태"])
+        for item in items:
+            writer.writerow([
+                item["id"], item["name"], item["region"], item["place"],
+                item["address"], item["start_date"], item["end_date"], item["status"],
+            ])
+        # UTF-8 BOM: 한글이 깨지지 않게
+        content = "\ufeff" + buffer.getvalue()
+        return StreamingResponse(
+            iter([content.encode("utf-8")]),
+            media_type="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition": "attachment; filename=festivals.csv"
+            },
+        )
+    finally:
+        db.close()

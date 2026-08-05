@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 데이터베이스
+*.db
+*.sqlite3
+
+# 업로드 파일 (대용량)
+backend/files/
+*.mov
+*.mp4
+*.avi
+*.zip
+
+# Node
+node_modules/
+dist/
+build/
+
+# 환경변수
+.env
+.env.local
+
+# 에디터/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 임시
+_to_delete/

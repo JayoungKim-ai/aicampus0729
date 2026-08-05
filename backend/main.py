@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+
 import os
 import httpx
 from dotenv import load_dotenv
@@ -200,3 +201,37 @@ def search(keyword:str, asc:bool=True):
 #     db.close()
 
 #     return rows
+
+
+from fastapi.responses import HTMLResponse
+@app.get("/html_test", response_class=HTMLResponse)
+def html_test():
+    return "<h1>Hello, fastAPI</h1>"
+
+
+from fastapi.responses import PlainTextResponse
+@app.get("/plain_text", response_class=PlainTextResponse)
+def plain_text():
+    return "Hello, fastAPI"
+
+from fastapi.responses import RedirectResponse
+@app.get("/redirect", response_class=RedirectResponse)
+def redirect():
+    return "http://www.naver.com"
+
+from fastapi.responses import FileResponse
+@app.get("/file_test", response_class=FileResponse)
+def file_test():
+    return "files/test.pdf"
+
+from fastapi.responses import StreamingResponse
+@app.get("/streaming_test", response_class=StreamingResponse)
+async def streaming_test():
+    file_path = "files/test.mov"
+    def iterfile():
+        with open(file_path, mode="rb") as file:
+            while chunk := file.read(1024 * 1024):  # 1MB씩 읽기
+                yield chunk
+    return StreamingResponse(iterfile(), media_type="video/quicktime")
+
+

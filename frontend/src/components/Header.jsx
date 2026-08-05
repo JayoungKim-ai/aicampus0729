@@ -1,7 +1,14 @@
 import React from "react";
 import HealthChk from "./HealthChk";
+import { Link, NavLink } from "react-router-dom";
 
 function Header() {
+  const ACTIVE_CLASS =
+    "px-4 py-2 rounded-lg text-body font-semibold text-primary-700 bg-primary-50";
+
+  const INACTIVE_CLASS =
+    "px-4 py-2 rounded-lg text-body font-medium text-gray-500 hover:text-primary-700 hover:bg-primary-50 transition-colors";
+
   return (
     <header className="sticky top-0 z-50 border-b border-primary-100 backdrop-blur-xl bg-white/85">
       <div className="max-w-6xl mx-auto px-6 md:px-8 h-16 flex items-center justify-between">
@@ -16,30 +23,38 @@ function Header() {
         </a>
         {/* 네비게이션 */}
         <nav className="hidden md:flex items-center gap-1">
-          <a
-            href="#"
-            className="px-4 py-2 rounded-lg text-body font-medium text-gray-500 hover:text-primary-700 hover:bg-primary-50 transition-colors"
-          >
-            홈
-          </a>
-          <a
-            href="#"
-            className="px-4 py-2 rounded-lg text-body font-semibold text-primary-700 bg-primary-50"
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? ACTIVE_CLASS : INACTIVE_CLASS
+            }
           >
             팀 소개
-          </a>
-          <a
-            href="#"
-            className="px-4 py-2 rounded-lg text-body font-medium text-gray-500 hover:text-primary-700 hover:bg-primary-50 transition-colors"
+          </NavLink>
+          <NavLink
+            to="/counter"
+            className={({ isActive }) =>
+              isActive ? ACTIVE_CLASS : INACTIVE_CLASS
+            }
           >
-            프로젝트
-          </a>
-          <a
-            href="#"
-            className="px-4 py-2 rounded-lg text-body font-medium text-gray-500 hover:text-primary-700 hover:bg-primary-50 transition-colors"
+            카운터
+          </NavLink>
+          <NavLink
+            to="/todolist"
+            className={({ isActive }) =>
+              isActive ? ACTIVE_CLASS : INACTIVE_CLASS
+            }
           >
-            연락처
-          </a>
+            투두리스트
+          </NavLink>
+          <NavLink
+            to="/festivals"
+            className={({ isActive }) =>
+              isActive ? ACTIVE_CLASS : INACTIVE_CLASS
+            }
+          >
+            축제찾기
+          </NavLink>
         </nav>{" "}
         <HealthChk />
       </div>
